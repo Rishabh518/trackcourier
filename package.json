@@ -1,0 +1,123 @@
+{
+  "name": "@org/infra",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "@nx/esbuild:esbuild",
+        "outputs": [
+          "{options.outputPath}"
+        ],
+        "defaultConfiguration": "production",
+        "options": {
+          "platform": "node",
+          "outputPath": "apps/infra/dist",
+          "format": [
+            "cjs"
+          ],
+          "bundle": false,
+          "main": "apps/infra/src/main.ts",
+          "tsConfig": "apps/infra/tsconfig.app.json",
+          "assets": [
+            "apps/infra/src/assets"
+          ],
+          "esbuildOptions": {
+            "sourcemap": true,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        },
+        "configurations": {
+          "development": {},
+          "production": {
+            "esbuildOptions": {
+              "sourcemap": false,
+              "outExtension": {
+                ".js": ".js"
+              }
+            }
+          }
+        }
+      },
+      "prune-lockfile": {
+        "dependsOn": [
+          "build"
+        ],
+        "cache": true,
+        "executor": "@nx/js:prune-lockfile",
+        "outputs": [
+          "{workspaceRoot}/apps/infra/dist/package.json",
+          "{workspaceRoot}/apps/infra/dist/pnpm-lock.yaml"
+        ],
+        "options": {
+          "buildTarget": "build"
+        }
+      },
+      "copy-workspace-modules": {
+        "dependsOn": [
+          "build"
+        ],
+        "cache": true,
+        "outputs": [
+          "{workspaceRoot}/apps/infra/dist/workspace_modules"
+        ],
+        "executor": "@nx/js:copy-workspace-modules",
+        "options": {
+          "buildTarget": "build"
+        }
+      },
+      "prune": {
+        "dependsOn": [
+          "prune-lockfile",
+          "copy-workspace-modules"
+        ],
+        "executor": "nx:noop"
+      },
+      "serve": {
+        "continuous": true,
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": [
+          "build"
+        ],
+        "options": {
+          "buildTarget": "@org/infra:build",
+          "runBuildTargetDependencies": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "@org/infra:build:development"
+          },
+          "production": {
+            "buildTarget": "@org/infra:build:production"
+          }
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "@aws-sdk/client-rekognition": "^3.1093.0",
+    "@aws-sdk/client-sqs": "^3.1072.0",
+    "aws-cdk-lib": "^2.257.0",
+    "axios": "^1.18.1",
+    "axios-cookiejar-support": "^7.0.0",
+    "cheerio": "^1.2.0",
+    "constructs": "^10.6.0",
+    "googleapis": "^173.0.0",
+    "tough-cookie": "^6.0.2"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1063.0",
+    "@types/aws-lambda": "^8.10.162",
+    "@types/cheerio": "^1.0.0",
+    "@types/node": "20.19.9",
+    "aws-cdk": "^2.1126.0",
+    "aws-lambda": "^1.0.7",
+    "body-parser": "^2.3.0",
+    "nodemailer": "^9.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.3"
+  }
+}
